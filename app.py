@@ -210,7 +210,6 @@ else:
                 new_desc = st.text_input("Description", value=selected_row["description"] if selected_row["description"] else "")
                 new_from_country = st.selectbox("Paid FROM Country", ["South Africa", "New Zealand"], index=0 if selected_row["from_country"] == "South Africa" else 1)
 
-                # Fixed edit logic
                 if new_from_country == "New Zealand":
                     new_from_bank = st.selectbox("Paid FROM Bank", ["Westpac New Zealand"], index=0)
                 else:
