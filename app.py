@@ -17,7 +17,7 @@ st.caption("Marece is a New Zealand Citizen based in New Zealand. Charlene and M
 st.markdown(
     """
     <div style="background-color: #FFF3E0; padding: 6px 10px; border-radius: 8px; border-left: 4px solid #FF9800; margin-bottom: 15px; font-size: 0.85rem; line-height: 1.3;">
-        👉 <strong>Tap the three lines ☰ at the top‑right corner</strong> to open the summary menu with totals and today’s date.
+        👉 <strong>Tap the three lines ☰ at the top‑left corner</strong> to open the summary menu with totals and today’s date.
     </div>
     """,
     unsafe_allow_html=True
@@ -99,7 +99,7 @@ st.sidebar.metric("💰 Marece (total)", f"R {marece_total:,.2f}")
 st.sidebar.metric("💰 Charlene (total)", f"R {charlene_total:,.2f}")
 st.sidebar.metric("🏦 Mother Linda (total received)", f"R {total:,.2f}")
 st.sidebar.markdown("---")
-st.sidebar.info("Tap the three lines ☰ at the top‑right to open this menu on mobile.")
+st.sidebar.info("Tap the three lines ☰ at the top‑left corner to open this menu on mobile.")
 
 # ---------- MAIN APP ----------
 # ----- Add payment section -----
