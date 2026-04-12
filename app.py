@@ -4,22 +4,12 @@ import pandas as pd
 from datetime import date
 
 # ---------- BANK LISTS ----------
-SA_BANKS = [
+SA_MAINSTREAM_BANKS = [
     "ABSA Bank",
     "Standard Bank",
     "First National Bank (FNB)",
     "Nedbank",
-    "Capitec Bank",
-    "Investec",
-    "African Bank",
-    "TymeBank",
-    "Discovery Bank",
-    "Bidvest Bank",
-    "Sasfin Bank",
-    "UBank",
-    "Mercantile Bank",
-    "HBZ Bank",
-    "Bank Zero"
+    "Capitec Bank"
 ]
 
 NZ_BANKS = ["Westpac New Zealand"]
@@ -87,8 +77,10 @@ def update_payment(payment_id, date_str, payer, amount, description, from_countr
     conn.close()
 
 # ---------- STREAMLIT UI ----------
-st.set_page_config(page_title="Payment Tracker: Marece & Charlene to Linda", page_icon="💰")
-st.title("💰 Payment Tracker: Marece & Charlene → Linda")
+st.set_page_config(page_title="Payment Tracker: Marece & Charlene to Mother Linda", page_icon="💰")
+
+st.title("💰 Payment Tracker: Marece & Charlene to Mother Linda")
+st.caption("Marece is a New Zealand Citizen based in New Zealand. Charlene and Mother Linda are South African Citizens based in South Africa.")
 
 # Initialize DB
 init_db()
@@ -103,7 +95,7 @@ if not df_all.empty:
 
     st.sidebar.metric("Total paid by MARECE", f"R{total_marece:,.2f}")
     st.sidebar.metric("Total paid by CHARLENE", f"R{total_charlene:,.2f}")
-    st.sidebar.metric("Total received by LINDA", f"R{total_linda:,.2f}")
+    st.sidebar.metric("Total received by MOTHER LINDA", f"R{total_linda:,.2f}")
 else:
     st.sidebar.info("No payments recorded yet.")
 
@@ -125,11 +117,11 @@ with st.form("add_form", clear_on_submit=True):
     from_country = st.selectbox("Paid FROM Country", ["South Africa", "New Zealand"])
 
     if from_country == "South Africa":
-        from_bank = st.selectbox("Paid FROM Bank", SA_BANKS)
+        from_bank = st.selectbox("Paid FROM Bank", SA_MAINSTREAM_BANKS)
     else:
         from_bank = st.selectbox("Paid FROM Bank", NZ_BANKS)
 
-    to_bank = st.selectbox("Paid TO Bank (Beneficiary Bank)", SA_BANKS, index=0)
+    to_bank = st.selectbox("Paid TO Bank (Beneficiary Bank)", ["ABSA Bank"])
 
     beneficiary = st.selectbox("Beneficiary", list(BENEFICIARIES.keys()))
 
@@ -173,27 +165,27 @@ else:
     # ---------- CLEAN CSV EXPORT ----------
     export_df = df.copy()
     export_df = export_df.rename(columns={
-        "date": "Date",
-        "payer": "Payer",
-        "amount": "Amount (ZAR)",
-        "description": "Description",
-        "from_country": "From Country",
-        "from_bank": "From Bank",
-        "to_bank": "To Bank",
-        "beneficiary": "Beneficiary"
+        "date": "DATE",
+        "payer": "PAYER",
+        "amount": "AMOUNT (ZAR)",
+        "description": "DESCRIPTION",
+        "from_country": "FROM COUNTRY",
+        "from_bank": "FROM BANK",
+        "to_bank": "TO BANK",
+        "beneficiary": "BENEFICIARY"
     })
 
-    export_df["Amount (ZAR)"] = export_df["Amount (ZAR)"].apply(lambda x: f"R {x:,.2f}")
+    export_df["AMOUNT (ZAR)"] = export_df["AMOUNT (ZAR)"].apply(lambda x: f"R {x:,.2f}")
 
     export_df = export_df[[
-        "Date", "Payer", "Amount (ZAR)", "Description",
-        "From Country", "From Bank", "To Bank", "Beneficiary"
+        "DATE", "PAYER", "AMOUNT (ZAR)", "DESCRIPTION",
+        "FROM COUNTRY", "FROM BANK", "TO BANK", "BENEFICIARY"
     ]]
 
     csv_data = export_df.to_csv(index=False).encode("utf-8")
 
     st.download_button(
-        label="⬇️ Download clean CSV",
+        label="⬇️ Download CSV",
         data=csv_data,
         file_name="payments_clean.csv",
         mime="text/csv",
@@ -218,11 +210,11 @@ else:
                 new_from_country = st.selectbox("Paid FROM Country", ["South Africa", "New Zealand"], index=0 if selected_row["from_country"] == "South Africa" else 1)
 
                 if new_from_country == "South Africa":
-                    new_from_bank = st.selectbox("Paid FROM Bank", SA_BANKS, index=SA_BANKS.index(selected_row["from_bank"]))
+                    new_from_bank = st.selectbox("Paid FROM Bank", SA_MAINSTREAM_BANKS, index=SA_MAINSTREAM_BANKS.index(selected_row["from_bank"]))
                 else:
                     new_from_bank = st.selectbox("Paid FROM Bank", NZ_BANKS, index=0)
 
-                new_to_bank = st.selectbox("Paid TO Bank", SA_BANKS, index=SA_BANKS.index(selected_row["to_bank"]))
+                new_to_bank = st.selectbox("Paid TO Bank", ["ABSA Bank"])
                 new_beneficiary = st.selectbox("Beneficiary", list(BENEFICIARIES.keys()), index=0)
 
                 if st.form_submit_button("💾 Save changes"):
@@ -245,23 +237,6 @@ else:
             delete_payment(selected_id)
             st.success(f"Payment #{selected_id} deleted.")
             st.rerun()
-
-# ---------- FILTER ----------
-st.subheader("🔍 Filter payments by payer")
-filter_payer = st.radio("Show only:", ["All", "Marece", "Charlene"], horizontal=True)
-if filter_payer != "All":
-    filtered_df = df[df["payer"] == filter_payer]
-else:
-    filtered_df = df
-
-if not filtered_df.empty:
-    st.dataframe(
-        filtered_df[display_cols].style.format({"amount": "R{:.2f}"}),
-        use_container_width=True,
-        hide_index=True,
-    )
-else:
-    st.info("No payments for this filter.")
 
 # Footer
 st.caption("💡 Tip: All payments are stored locally in 'payments.db' (SQLite).")
