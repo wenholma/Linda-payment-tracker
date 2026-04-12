@@ -74,6 +74,7 @@ def get_payments_df():
 
 # ---------- SIDEBAR (mobile-friendly label) ----------
 st.sidebar.markdown("## 📋 Summary & Menu")
+st.sidebar.markdown(f"**Today's date:** {date.today().strftime('%d %B %Y')}")
 st.sidebar.markdown("---")
 
 df_all = get_payments_df()
