@@ -13,11 +13,11 @@ st.set_page_config(
 st.title("💰 Payment Tracker: Marece & Charlene to Mother Linda")
 st.caption("Marece is a New Zealand Citizen based in New Zealand. Charlene and Mother Linda are South African Citizens based in South Africa.")
 
-# ----- Mobile menu instruction (very visible) -----
+# ----- Mobile menu instruction (compact & mobile-friendly) -----
 st.markdown(
     """
-    <div style="background-color: #FFF3E0; padding: 10px; border-radius: 10px; border-left: 5px solid #FF9800; margin-bottom: 20px;">
-        <span style="font-size: 1.2rem;">👉 <strong>Tap the three lines ☰ at the top‑right corner</strong> to open the summary menu with totals and today’s date.</span>
+    <div style="background-color: #FFF3E0; padding: 6px 10px; border-radius: 8px; border-left: 4px solid #FF9800; margin-bottom: 15px; font-size: 0.85rem; line-height: 1.3;">
+        👉 <strong>Tap the three lines ☰ at the top‑right corner</strong> to open the summary menu with totals and today’s date.
     </div>
     """,
     unsafe_allow_html=True
