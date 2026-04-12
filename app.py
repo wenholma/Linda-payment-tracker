@@ -1,0 +1,268 @@
+import streamlit as st
+import sqlite3
+import pandas as pd
+from datetime import date
+
+# ---------- BANK LISTS ----------
+SA_BANKS = [
+    "ABSA Bank",
+    "Standard Bank",
+    "First National Bank (FNB)",
+    "Nedbank",
+    "Capitec Bank",
+    "Investec",
+    "African Bank",
+    "TymeBank",
+    "Discovery Bank",
+    "Bidvest Bank",
+    "Sasfin Bank",
+    "UBank",
+    "Mercantile Bank",
+    "HBZ Bank",
+    "Bank Zero"
+]
+
+NZ_BANKS = ["Westpac New Zealand"]
+
+BENEFICIARIES = {
+    "Linda": {
+        "bank": "ABSA Bank"
+    }
+}
+
+# ---------- DATABASE SETUP ----------
+DB_NAME = "payments.db"
+
+def init_db():
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS payments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            date TEXT NOT NULL,
+            payer TEXT NOT NULL,
+            amount REAL NOT NULL,
+            description TEXT,
+            from_country TEXT,
+            from_bank TEXT,
+            to_bank TEXT,
+            beneficiary TEXT
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+def add_payment(date_str, payer, amount, description, from_country, from_bank, to_bank, beneficiary):
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
+    c.execute("""
+        INSERT INTO payments (date, payer, amount, description, from_country, from_bank, to_bank, beneficiary)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    """, (date_str, payer, amount, description, from_country, from_bank, to_bank, beneficiary))
+    conn.commit()
+    conn.close()
+
+def get_all_payments():
+    conn = sqlite3.connect(DB_NAME)
+    df = pd.read_sql_query("SELECT * FROM payments ORDER BY date DESC, id DESC", conn)
+    conn.close()
+    return df
+
+def delete_payment(payment_id):
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
+    c.execute("DELETE FROM payments WHERE id = ?", (payment_id,))
+    conn.commit()
+    conn.close()
+
+def update_payment(payment_id, date_str, payer, amount, description, from_country, from_bank, to_bank, beneficiary):
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
+    c.execute("""
+        UPDATE payments
+        SET date = ?, payer = ?, amount = ?, description = ?, from_country = ?, from_bank = ?, to_bank = ?, beneficiary = ?
+        WHERE id = ?
+    """, (date_str, payer, amount, description, from_country, from_bank, to_bank, beneficiary, payment_id))
+    conn.commit()
+    conn.close()
+
+# ---------- STREAMLIT UI ----------
+st.set_page_config(page_title="Payment Tracker: Marece & Charlene to Linda", page_icon="💰")
+st.title("💰 Payment Tracker: Marece & Charlene → Linda")
+
+# Initialize DB
+init_db()
+
+# Sidebar: quick stats
+st.sidebar.header("📊 Summary")
+df_all = get_all_payments()
+if not df_all.empty:
+    total_marece = df_all[df_all["payer"] == "Marece"]["amount"].sum()
+    total_charlene = df_all[df_all["payer"] == "Charlene"]["amount"].sum()
+    total_linda = total_marece + total_charlene
+
+    st.sidebar.metric("Total paid by MARECE", f"R{total_marece:,.2f}")
+    st.sidebar.metric("Total paid by CHARLENE", f"R{total_charlene:,.2f}")
+    st.sidebar.metric("Total received by LINDA", f"R{total_linda:,.2f}")
+else:
+    st.sidebar.info("No payments recorded yet.")
+
+# ---------- ADD NEW PAYMENT ----------
+st.subheader("➕ Record a new payment")
+with st.form("add_form", clear_on_submit=True):
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        payment_date = st.date_input("Date", value=date.today())
+    with col2:
+        payer = st.selectbox("Payer", ["Marece", "Charlene"])
+    with col3:
+        amount = st.number_input("Amount (ZAR)", min_value=0.00, value=0.00, step=0.01, format="%.2f")
+
+    description = st.text_input("Description (optional)", placeholder="e.g., groceries, rent, dinner...")
+
+    st.markdown("### Bank Details")
+
+    from_country = st.selectbox("Paid FROM Country", ["South Africa", "New Zealand"])
+
+    if from_country == "South Africa":
+        from_bank = st.selectbox("Paid FROM Bank", SA_BANKS)
+    else:
+        from_bank = st.selectbox("Paid FROM Bank", NZ_BANKS)
+
+    to_bank = st.selectbox("Paid TO Bank (Beneficiary Bank)", SA_BANKS, index=0)
+
+    beneficiary = st.selectbox("Beneficiary", list(BENEFICIARIES.keys()))
+
+    submitted = st.form_submit_button("💾 Add Payment")
+    if submitted:
+        if amount <= 0:
+            st.error("Amount must be greater than 0.")
+        else:
+            add_payment(
+                payment_date.isoformat(),
+                payer,
+                amount,
+                description,
+                from_country,
+                from_bank,
+                to_bank,
+                beneficiary
+            )
+            st.success("Payment added!")
+            st.rerun()
+
+# ---------- DISPLAY & MANAGE PAYMENTS ----------
+st.subheader("📋 Payment history")
+
+df = get_all_payments()
+
+if df.empty:
+    st.info("No payments yet. Use the form above to add one.")
+else:
+    display_cols = [
+        "id", "date", "payer", "amount", "description",
+        "from_country", "from_bank", "to_bank", "beneficiary"
+    ]
+
+    st.dataframe(
+        df[display_cols].style.format({"amount": "R{:.2f}"}),
+        use_container_width=True,
+        hide_index=True,
+    )
+
+    # ---------- CLEAN CSV EXPORT ----------
+    export_df = df.copy()
+    export_df = export_df.rename(columns={
+        "date": "Date",
+        "payer": "Payer",
+        "amount": "Amount (ZAR)",
+        "description": "Description",
+        "from_country": "From Country",
+        "from_bank": "From Bank",
+        "to_bank": "To Bank",
+        "beneficiary": "Beneficiary"
+    })
+
+    export_df["Amount (ZAR)"] = export_df["Amount (ZAR)"].apply(lambda x: f"R {x:,.2f}")
+
+    export_df = export_df[[
+        "Date", "Payer", "Amount (ZAR)", "Description",
+        "From Country", "From Bank", "To Bank", "Beneficiary"
+    ]]
+
+    csv_data = export_df.to_csv(index=False).encode("utf-8")
+
+    st.download_button(
+        label="⬇️ Download clean CSV",
+        data=csv_data,
+        file_name="payments_clean.csv",
+        mime="text/csv",
+    )
+
+    # ---------- EDIT / DELETE ----------
+    st.subheader("✏️ Edit or delete a payment")
+    payment_ids = df["id"].tolist()
+    selected_id = st.selectbox("Select payment ID to edit/delete", payment_ids, key="select_id")
+
+    selected_row = df[df["id"] == selected_id].iloc[0]
+
+    col_edit, col_del = st.columns([3, 1])
+
+    with col_edit:
+        with st.expander(f"Edit payment #{selected_id}", expanded=False):
+            with st.form("edit_form"):
+                new_date = st.date_input("Date", value=pd.to_datetime(selected_row["date"]).date())
+                new_payer = st.selectbox("Payer", ["Marece", "Charlene"], index=0 if selected_row["payer"] == "Marece" else 1)
+                new_amount = st.number_input("Amount (ZAR)", min_value=0.00, value=float(selected_row["amount"]), step=0.01, format="%.2f")
+                new_desc = st.text_input("Description", value=selected_row["description"] if selected_row["description"] else "")
+                new_from_country = st.selectbox("Paid FROM Country", ["South Africa", "New Zealand"], index=0 if selected_row["from_country"] == "South Africa" else 1)
+
+                if new_from_country == "South Africa":
+                    new_from_bank = st.selectbox("Paid FROM Bank", SA_BANKS, index=SA_BANKS.index(selected_row["from_bank"]))
+                else:
+                    new_from_bank = st.selectbox("Paid FROM Bank", NZ_BANKS, index=0)
+
+                new_to_bank = st.selectbox("Paid TO Bank", SA_BANKS, index=SA_BANKS.index(selected_row["to_bank"]))
+                new_beneficiary = st.selectbox("Beneficiary", list(BENEFICIARIES.keys()), index=0)
+
+                if st.form_submit_button("💾 Save changes"):
+                    update_payment(
+                        selected_id,
+                        new_date.isoformat(),
+                        new_payer,
+                        new_amount,
+                        new_desc,
+                        new_from_country,
+                        new_from_bank,
+                        new_to_bank,
+                        new_beneficiary
+                    )
+                    st.success("Payment updated!")
+                    st.rerun()
+
+    with col_del:
+        if st.button("🗑️ Delete this payment", key="delete_btn"):
+            delete_payment(selected_id)
+            st.success(f"Payment #{selected_id} deleted.")
+            st.rerun()
+
+# ---------- FILTER ----------
+st.subheader("🔍 Filter payments by payer")
+filter_payer = st.radio("Show only:", ["All", "Marece", "Charlene"], horizontal=True)
+if filter_payer != "All":
+    filtered_df = df[df["payer"] == filter_payer]
+else:
+    filtered_df = df
+
+if not filtered_df.empty:
+    st.dataframe(
+        filtered_df[display_cols].style.format({"amount": "R{:.2f}"}),
+        use_container_width=True,
+        hide_index=True,
+    )
+else:
+    st.info("No payments for this filter.")
+
+# Footer
+st.caption("💡 Tip: All payments are stored locally in 'payments.db' (SQLite).")
+st.caption("Developed by Marece Wenhold, 2026, Paekākāriki, New Zealand.")
