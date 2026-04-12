@@ -13,6 +13,16 @@ st.set_page_config(
 st.title("💰 Payment Tracker: Marece & Charlene to Mother Linda")
 st.caption("Marece is a New Zealand Citizen based in New Zealand. Charlene and Mother Linda are South African Citizens based in South Africa.")
 
+# ----- Mobile menu instruction (very visible) -----
+st.markdown(
+    """
+    <div style="background-color: #FFF3E0; padding: 10px; border-radius: 10px; border-left: 5px solid #FF9800; margin-bottom: 20px;">
+        <span style="font-size: 1.2rem;">👉 <strong>Tap the three lines ☰ at the top‑right corner</strong> to open the summary menu with totals and today’s date.</span>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
 # Database setup
 DB_NAME = "payments.db"
 
@@ -89,7 +99,7 @@ st.sidebar.metric("💰 Marece (total)", f"R {marece_total:,.2f}")
 st.sidebar.metric("💰 Charlene (total)", f"R {charlene_total:,.2f}")
 st.sidebar.metric("🏦 Mother Linda (total received)", f"R {total:,.2f}")
 st.sidebar.markdown("---")
-st.sidebar.info("Tap the three lines ☰ to open this menu on mobile.")
+st.sidebar.info("Tap the three lines ☰ at the top‑right to open this menu on mobile.")
 
 # ---------- MAIN APP ----------
 # ----- Add payment section -----
