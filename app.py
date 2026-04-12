@@ -72,7 +72,10 @@ def get_payments_df():
     conn.close()
     return df
 
-# Sidebar totals
+# ---------- SIDEBAR (mobile-friendly label) ----------
+st.sidebar.markdown("## 📋 Summary & Menu")
+st.sidebar.markdown("---")
+
 df_all = get_payments_df()
 if not df_all.empty:
     marece_total = df_all[df_all["payer"] == "Marece"]["amount"].sum()
@@ -81,15 +84,16 @@ if not df_all.empty:
 else:
     marece_total = charlene_total = total = 0.0
 
-st.sidebar.header("Summary")
-st.sidebar.metric("Total paid by MARECE", f"R {marece_total:,.2f}")
-st.sidebar.metric("Total paid by CHARLENE", f"R {charlene_total:,.2f}")
-st.sidebar.metric("Total received by MOTHER LINDA", f"R {total:,.2f}")
+st.sidebar.metric("💰 Marece (total)", f"R {marece_total:,.2f}")
+st.sidebar.metric("💰 Charlene (total)", f"R {charlene_total:,.2f}")
+st.sidebar.metric("🏦 Mother Linda (total received)", f"R {total:,.2f}")
+st.sidebar.markdown("---")
+st.sidebar.info("Tap the three lines ☰ to open this menu on mobile.")
 
-# ----- Add payment section (NO FORM, dynamic bank dropdown) -----
+# ---------- MAIN APP ----------
+# ----- Add payment section -----
 st.header("➕ Record a new payment")
 
-# Use columns for layout
 col1, col2 = st.columns(2)
 
 with col1:
@@ -101,7 +105,6 @@ with col2:
     add_description = st.text_input("Description (optional)", key="add_desc")
     add_from_country = st.selectbox("Paid FROM Country", ["South Africa", "New Zealand"], key="add_country")
     
-    # Dynamic bank options based on selected country
     if add_from_country == "New Zealand":
         bank_options = ["Westpac New Zealand"]
     else:
@@ -111,8 +114,7 @@ with col2:
     add_to_bank = st.selectbox("Paid TO Bank (Beneficiary Bank)", ["ABSA Bank"], key="add_to_bank")
     add_beneficiary = st.selectbox("Beneficiary", ["Linda"], key="add_beneficiary")
 
-# Add button (outside any form)
-if st.button("💾 Add Payment", key="add_btn"):
+if st.button("💾 Add Payment", key="add_btn", use_container_width=True):
     if add_amount <= 0:
         st.error("Amount must be greater than 0.")
     else:
@@ -129,20 +131,20 @@ if st.button("💾 Add Payment", key="add_btn"):
         st.success("Payment added!")
         st.rerun()
 
-# ----- Payment history section -----
+# ----- Payment history -----
 st.header("📋 Payment history")
 df = get_payments_df()
 if df.empty:
     st.info("No payments recorded yet.")
 else:
-    # Display dataframe with formatted amount
+    # Show dataframe with formatted amount (includes ID for reference)
     display_df = df.copy()
     display_df["amount_display"] = display_df["amount"].apply(lambda x: f"R {x:,.2f}")
     display_cols = ["id", "date", "payer", "amount_display", "description", "from_country", "from_bank", "to_bank", "beneficiary"]
     display_df = display_df[display_cols].rename(columns={"amount_display": "Amount"})
     st.dataframe(display_df, use_container_width=True)
     
-    # Download CSV
+    # Download CSV – NO ID COLUMN
     csv_df = df[["date", "payer", "amount", "description", "from_country", "from_bank", "to_bank", "beneficiary"]].copy()
     csv_df = csv_df.rename(columns={
         "date": "Date",
@@ -158,7 +160,7 @@ else:
     csv = csv_df.to_csv(index=False).encode("utf-8")
     st.download_button("⬇️ Download clean CSV", data=csv, file_name="payments.csv", mime="text/csv")
 
-# ----- Edit or delete section -----
+# ----- Edit or delete -----
 st.header("✏️ Edit or delete a payment")
 if df.empty:
     st.info("No payments to edit.")
@@ -168,7 +170,6 @@ else:
     selected_row = df[df["id"] == selected_id].iloc[0]
     
     with st.expander(f"Edit payment #{selected_id}"):
-        # Store original data in session state for this payment
         if "edit_orig_id" not in st.session_state or st.session_state.edit_orig_id != selected_id:
             st.session_state.edit_orig_id = selected_id
             st.session_state.edit_date = date.fromisoformat(selected_row["date"])
@@ -189,12 +190,10 @@ else:
             edit_description = st.text_input("Description", value=st.session_state.edit_description, key="edit_description")
             edit_from_country = st.selectbox("Paid FROM Country", ["South Africa", "New Zealand"], index=0 if st.session_state.edit_from_country == "South Africa" else 1, key="edit_from_country")
             
-            # Dynamic bank options based on selected country
             if edit_from_country == "New Zealand":
                 bank_options = ["Westpac New Zealand"]
             else:
                 bank_options = ["ABSA Bank", "Standard Bank", "First National Bank (FNB)", "Nedbank", "Capitec Bank"]
-            # Ensure current bank is valid for the selected country
             current_bank = st.session_state.edit_from_bank
             if current_bank not in bank_options:
                 current_bank = bank_options[0]
@@ -205,7 +204,7 @@ else:
         
         col_save, col_del = st.columns(2)
         with col_save:
-            if st.button("💾 Save changes", key="save_edit"):
+            if st.button("💾 Save changes", key="save_edit", use_container_width=True):
                 if edit_amount <= 0:
                     st.error("Amount must be greater than 0.")
                 else:
@@ -223,12 +222,12 @@ else:
                     st.success("Payment updated!")
                     st.rerun()
         with col_del:
-            if st.button("🗑️ Delete this payment", key="delete_payment"):
+            if st.button("🗑️ Delete this payment", key="delete_payment", use_container_width=True):
                 delete_payment(selected_id)
                 st.success("Payment deleted!")
                 st.rerun()
 
-# ----- Filter section -----
+# ----- Filter -----
 st.header("🔍 Filter payments by payer")
 filter_choice = st.radio("Show", ["All", "Marece", "Charlene"], horizontal=True)
 df_filtered = get_payments_df()
