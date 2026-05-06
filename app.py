@@ -79,18 +79,18 @@ def update_payment(payment_id, date_str, payer, amount, description, from_countr
 # ---------- STREAMLIT UI ----------
 st.set_page_config(page_title="Payment Tracker: Marece & Charlene to Mother Linda", page_icon="💰")
 
-# CHANGED: Title in smaller font
+# Title in smaller font
 st.markdown("""
     <h3 style='margin-bottom: 0;'>💰 Payment Tracker: Marece &amp; Charlene to Mother Linda</h3>
 """, unsafe_allow_html=True)
 
-# CHANGED: New caption in black font
-st.caption("This tracker is from 01 March 2026")
+# Bigger, bold, black caption
+st.markdown("<p style='font-size:18px; font-weight:bold; color:black;'>This tracker is from 01 March 2026</p>", unsafe_allow_html=True)
 
 # Initialize DB
 init_db()
 
-# CHANGED: Updated sidebar instruction
+# Sidebar instruction
 st.sidebar.markdown("👉 Tap the **2 >> arrows** at the top‑left corner to open the summary menu with totals and today's date.")
 
 # Sidebar: quick stats
@@ -102,14 +102,17 @@ if not df_all.empty:
     total_linda = total_marece + total_charlene
 
     st.sidebar.metric("💰 Marece (total)", f"R{total_marece:,.2f}")
-    # CHANGED: Updated Charlene label
-    st.sidebar.metric("💰 Charlene (yet to capture all the funds she has provided)", f"R{total_charlene:,.2f}")
+
+    # Charlene with wrapping label
+    st.sidebar.markdown("💰 Charlene<br><small>(yet to capture all the funds she has provided)</small>", unsafe_allow_html=True)
+    st.sidebar.metric(label="", value=f"R{total_charlene:,.2f}")
+
     st.sidebar.metric("💰 Mother Linda (total)", f"R{total_linda:,.2f}")
 else:
     st.sidebar.info("No payments recorded yet.")
 
 # ---------- ADD NEW PAYMENT ----------
-# CHANGED: Subheader in smaller font
+# Subheader in smaller font
 st.markdown("""
     <h4 style='margin-top: 1rem;'>➕ Record a new payment</h4>
 """, unsafe_allow_html=True)
