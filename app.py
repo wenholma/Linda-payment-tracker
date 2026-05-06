@@ -88,7 +88,7 @@ st.markdown("""
 st.markdown("<p style='font-size:18px; font-weight:bold; color:black;'>This tracker is from 01 March 2026</p>", unsafe_allow_html=True)
 
 # Arrow instruction in black
-st.markdown("<p style='color:black;'>👉 Tap the 2 >> arrows at the top‑left corner to open the summary menu with totals and today's date.</p>", unsafe_allow_html=True)
+st.markdown("<p style='color:black;'>👉 Tap the 2 >> arrows at the top‑left corner for total money paid to mother to date.</p>", unsafe_allow_html=True)
 
 # Initialize DB
 init_db()
@@ -101,13 +101,33 @@ if not df_all.empty:
     total_charlene = df_all[df_all["payer"] == "Charlene"]["amount"].sum()
     total_linda = total_marece + total_charlene
 
-    st.sidebar.metric("💰 Marece (total)", f"R{total_marece:,.2f}")
+    # Get last payment dates for each payer
+    marece_df = df_all[df_all["payer"] == "Marece"]
+    charlene_df = df_all[df_all["payer"] == "Charlene"]
+
+    if not marece_df.empty:
+        marece_last_date = pd.to_datetime(marece_df["date"]).max().strftime("%d %B %Y")
+    else:
+        marece_last_date = "N/A"
+
+    if not charlene_df.empty:
+        charlene_last_date = pd.to_datetime(charlene_df["date"]).max().strftime("%d %B %Y")
+    else:
+        charlene_last_date = "N/A"
+
+    # Marece with last payment date - same font as Charlene
+    st.sidebar.markdown(f"💰 Marece<br><small>(total as of {marece_last_date})</small>", unsafe_allow_html=True)
+    st.sidebar.metric(label="", value=f"R{total_marece:,.2f}")
 
     # Charlene with wrapping label
-    st.sidebar.markdown("💰 Charlene<br><small>(yet to capture all the funds she has provided)</small>", unsafe_allow_html=True)
+    st.sidebar.markdown(f"💰 Charlene<br><small>(total as of {charlene_last_date})</small>", unsafe_allow_html=True)
     st.sidebar.metric(label="", value=f"R{total_charlene:,.2f}")
 
-    st.sidebar.metric("💰 Mother Linda (total)", f"R{total_linda:,.2f}")
+    st.sidebar.markdown("💰 Charlene<br><small>(yet to capture all the funds she has provided)</small>", unsafe_allow_html=True)
+
+    # Mother Linda total
+    st.sidebar.markdown("💰 Total payments to Mother Linda", unsafe_allow_html=True)
+    st.sidebar.metric(label="", value=f"R{total_linda:,.2f}")
 else:
     st.sidebar.info("No payments recorded yet.")
 
