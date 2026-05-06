@@ -101,32 +101,26 @@ if not df_all.empty:
     total_charlene = df_all[df_all["payer"] == "Charlene"]["amount"].sum()
     total_linda = total_marece + total_charlene
 
-    # Get last payment dates for each payer
+    # Get last payment date for Marece
     marece_df = df_all[df_all["payer"] == "Marece"]
-    charlene_df = df_all[df_all["payer"] == "Charlene"]
-
     if not marece_df.empty:
         marece_last_date = pd.to_datetime(marece_df["date"]).max().strftime("%d %B %Y")
     else:
         marece_last_date = "N/A"
 
-    if not charlene_df.empty:
-        charlene_last_date = pd.to_datetime(charlene_df["date"]).max().strftime("%d %B %Y")
-    else:
-        charlene_last_date = "N/A"
-
-    # Marece with last payment date - same font as Charlene
-    st.sidebar.markdown(f"💰 Marece<br><small>(total as of {marece_last_date})</small>", unsafe_allow_html=True)
+    # Marece
+    st.sidebar.markdown(f"💰 Marece<br><small>(total paid as of {marece_last_date})</small>", unsafe_allow_html=True)
+    st.sidebar.markdown("<br>", unsafe_allow_html=True)
     st.sidebar.metric(label="", value=f"R{total_marece:,.2f}")
 
-    # Charlene with wrapping label
-    st.sidebar.markdown(f"💰 Charlene<br><small>(total as of {charlene_last_date})</small>", unsafe_allow_html=True)
+    # Charlene
+    st.sidebar.markdown("💰 Charlene<br><small>(yet to capture all the funds paid from 1 March 2026)</small>", unsafe_allow_html=True)
+    st.sidebar.markdown("<br>", unsafe_allow_html=True)
     st.sidebar.metric(label="", value=f"R{total_charlene:,.2f}")
 
-    st.sidebar.markdown("💰 Charlene<br><small>(yet to capture all the funds she has provided)</small>", unsafe_allow_html=True)
-
-    # Mother Linda total
+    # Total payments to Mother Linda
     st.sidebar.markdown("💰 Total payments to Mother Linda", unsafe_allow_html=True)
+    st.sidebar.markdown("<br>", unsafe_allow_html=True)
     st.sidebar.metric(label="", value=f"R{total_linda:,.2f}")
 else:
     st.sidebar.info("No payments recorded yet.")
