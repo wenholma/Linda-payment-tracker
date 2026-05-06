@@ -87,14 +87,14 @@ st.markdown("""
 # Bold black date caption
 st.markdown("<p style='font-size:18px; font-weight:bold; color:black;'>This tracker is from 01 March 2026</p>", unsafe_allow_html=True)
 
-# Arrow instruction in default Streamlit caption font
-st.caption("👉 Tap the 2 >> arrows at the top‑left corner to open the summary menu with totals and today's date.")
+# Arrow instruction in black
+st.markdown("<p style='color:black;'>👉 Tap the 2 >> arrows at the top‑left corner to open the summary menu with totals and today's date.</p>", unsafe_allow_html=True)
 
 # Initialize DB
 init_db()
 
 # Sidebar: quick stats
-st.sidebar.header("📊 Summary")
+st.sidebar.header("📊 Summary from 1 March 2026")
 df_all = get_all_payments()
 if not df_all.empty:
     total_marece = df_all[df_all["payer"] == "Marece"]["amount"].sum()
