@@ -110,17 +110,14 @@ if not df_all.empty:
 
     # Marece
     st.sidebar.markdown(f"💰 Marece<br><small>(total paid as of {marece_last_date})</small>", unsafe_allow_html=True)
-    st.sidebar.markdown("<br>", unsafe_allow_html=True)
     st.sidebar.metric(label="", value=f"R{total_marece:,.2f}")
 
     # Charlene
     st.sidebar.markdown("💰 Charlene<br><small>(yet to capture all the funds paid from 1 March 2026)</small>", unsafe_allow_html=True)
-    st.sidebar.markdown("<br>", unsafe_allow_html=True)
     st.sidebar.metric(label="", value=f"R{total_charlene:,.2f}")
 
     # Total payments to Mother Linda
     st.sidebar.markdown("💰 Total payments to Mother Linda", unsafe_allow_html=True)
-    st.sidebar.markdown("<br>", unsafe_allow_html=True)
     st.sidebar.metric(label="", value=f"R{total_linda:,.2f}")
 else:
     st.sidebar.info("No payments recorded yet.")
