@@ -84,14 +84,14 @@ st.markdown("""
     <h3 style='margin-bottom: 0;'>💰 Payment Tracker: Marece &amp; Charlene to Mother Linda</h3>
 """, unsafe_allow_html=True)
 
-# Bigger, bold, black caption
+# Bold black date caption
 st.markdown("<p style='font-size:18px; font-weight:bold; color:black;'>This tracker is from 01 March 2026</p>", unsafe_allow_html=True)
+
+# Arrow instruction in default Streamlit caption font
+st.caption("👉 Tap the 2 >> arrows at the top‑left corner to open the summary menu with totals and today's date.")
 
 # Initialize DB
 init_db()
-
-# Sidebar instruction
-st.sidebar.markdown("👉 Tap the **2 >> arrows** at the top‑left corner to open the summary menu with totals and today's date.")
 
 # Sidebar: quick stats
 st.sidebar.header("📊 Summary")
