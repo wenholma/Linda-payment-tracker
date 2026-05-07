@@ -86,13 +86,20 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Bold black date caption
-st.markdown("<p style='font-size:18px; font-weight:bold; color:black;'>This tracker is from 01 March 2026</p>", unsafe_allow_html=True)
+st.markdown("<p style='font-size:18px; font-weight:bold; color:black;'>📅 This tracker is from 01 March 2026</p>", unsafe_allow_html=True)
 
 # Arrow instruction in black
-st.markdown("<p style='color:black;'>👉 Tap the 2 >> arrows at the top‑left corner for total money paid to mother to date.</p>", unsafe_allow_html=True)
+st.markdown("<p style='color:black;'>👈 Tap the 2 >> arrows at the top‑left corner for total money paid to mother to date.</p>", unsafe_allow_html=True)
 
-# Add to Home Screen instruction
-st.markdown("<p style='color:black;'>On your phone, look at the top right corner of Chrome. You'll see three little dots. Tap those, then choose 'Add to Home Screen'. That will put the app on your phone like a shortcut.</p>", unsafe_allow_html=True)
+# Add to Home Screen instruction - colourful with emojis
+st.markdown("""
+    <div style='background-color: #FFF3CD; border-left: 4px solid #FFC107; padding: 12px 16px; border-radius: 8px; margin: 10px 0;'>
+        <p style='color:#333; font-size:15px; margin: 0;'>
+            📱 <strong>Add this app to your phone's home screen so it's easy to open.</strong><br>
+            <span style='color:#666;'>Tap the three dots in the bottom‑right corner of your screen, choose <em>'Add page to'</em>, and then tap <strong>'Home screen'</strong>.</span>
+        </p>
+    </div>
+""", unsafe_allow_html=True)
 
 # Initialize DB
 init_db()
