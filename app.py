@@ -134,7 +134,7 @@ else:
     st.sidebar.info("No payments recorded yet.")
 
 # ---------- SECTION 1: ADD NEW PAYMENT ----------
-with st.expander("➕ Record a new payment", expanded=True):
+with st.expander("➕ Record a new payment", expanded=False):
     with st.form("add_form", clear_on_submit=True):
         col1, col2, col3 = st.columns(3)
         with col1:
